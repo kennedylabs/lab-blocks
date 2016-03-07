@@ -3,5 +3,3 @@ node_modules
 typings
 app/*.js
 app/*.js.map
-fabric/*.js
-fabric/*.js.map
