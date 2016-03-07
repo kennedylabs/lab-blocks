@@ -1,0 +1,19 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnType": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "app/**/*.js": true,
+    "app**/*.js.map": true,
+   /// "fabric/**/*.js": true,
+    "fabric*/*.js.map": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 200,
+  "search.exclude": {
+    "**/node_modules": false,
+    "**/bower_components": false
+  }
+}
