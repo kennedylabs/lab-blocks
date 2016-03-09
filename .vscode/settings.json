@@ -4,7 +4,7 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "app/**/*.js": true,
+    "app/**/*.js": false,
     "app/**/*.js.map": true
   },
   "files.trimTrailingWhitespace": true,
@@ -12,6 +12,6 @@
   "files.autoSaveDelay": 200,
   "search.exclude": {
     "**/node_modules": false,
-    "**/bower_components": false
+    "**/bower_components": true
   }
 }

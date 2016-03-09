@@ -1,6 +1,6 @@
 import {EnumMetadata} from '../utility/enum'
 
-export enum Color {
+export declare enum Color {
   Unspecified,
   ThemeDarker,
   ThemeDark,
@@ -51,7 +51,9 @@ export enum Color {
   Error
 }
 
-export module Color{
-  export var metadata = new EnumMetadata<Color>(Color, 'Color');
-  export var wrap = metadata.wrap;
-}
+export declare var Color: EnumMetadata<Color>;
+
+// export module Color{
+//   export var metadata = new EnumMetadata<Color>(Color, 'Color');
+//   export var wrap = metadata.wrap;
+// }
