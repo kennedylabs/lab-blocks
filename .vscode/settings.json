@@ -4,7 +4,7 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "app/**/*.js": false,
+    "app/**/*.js": true,
     "app/**/*.js.map": true
   },
   "files.trimTrailingWhitespace": true,
