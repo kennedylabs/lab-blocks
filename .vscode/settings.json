@@ -5,7 +5,7 @@
     "**/.git": true,
     "**/.DS_Store": true,
     "app/**/*.js": false,
-    "app/**/*.js.map": false
+    "app/**/*.js.map": true
   },
   "files.trimTrailingWhitespace": true,
   "files.autoSave": "afterDelay",
