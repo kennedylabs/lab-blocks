@@ -4,8 +4,8 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "app/**/*.js": true,
-    "app/**/*.js.map": true
+    "app/**/*.js": false,
+    "app/**/*.js.map": false
   },
   "files.trimTrailingWhitespace": true,
   "files.autoSave": "afterDelay",
