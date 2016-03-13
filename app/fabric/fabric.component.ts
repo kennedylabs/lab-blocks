@@ -1,7 +1,7 @@
 import {Color} from './fabric.color.enum'
 
 export class FabricComponent {
-  bgColor: Color.wrap();
+  private _bgColor: Color.wrap();
 
   getClasses() {
     var classes = new Array<string>();

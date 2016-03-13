@@ -5,7 +5,9 @@ export interface EnumType<T> {
   [key: number]: string;
 };
 
-declare type EnumValueOrString<T> = string | T;
+declare type EnumValueOrString<T> = T | string;
+
+export var enhanceEnum = _.merge;
 
 export interface EnumOptions {
   doNumericChecks?: boolean;
@@ -95,7 +97,7 @@ export class EnumMetadata<T> {
   }
 
   getValues(): Array<T> {
-    return _.values<T>(this.enumeration).filter(_.isNumber);
+    return _.valuesIn(this.enumeration).filter(_.isNumber) as Array<T>;
   }
 
   private getStringForEnumValue(enumValue: T): string {
@@ -119,10 +121,10 @@ export class EnumMetadata<T> {
       str.startsWith(this.config.jsStringPostfix))
       str = str.slice(this.config.jsStringPostfix.length);
 
-    str.replace(" ", "");
-
     if (_.isFunction(this.config.inverseStringTransform))
       str = this.config.inverseStringTransform(str);
+
+    str.replace(" ", "");
 
     return str;
   }
