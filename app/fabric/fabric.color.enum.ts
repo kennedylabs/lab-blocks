@@ -1,6 +1,8 @@
-import {EnumMetadata, EnumValueWrapper, enhanceEnum} from '../utility/enum'
+import {Enum} from '../utility/enum'
 
-export enum ColorEnum {
+Enum.register(Color, "Color");
+
+export enum Color {
   Unspecified,
   ThemeDarker,
   ThemeDark,
@@ -50,7 +52,3 @@ export enum ColorEnum {
   Alert,
   Error
 }
-
-export declare type EnumMetadata<T> = EnumMetadata<T>;
-
-export var Color = enhanceEnum(ColorEnum, new EnumMetadata<ColorEnum>(ColorEnum, 'Color'));

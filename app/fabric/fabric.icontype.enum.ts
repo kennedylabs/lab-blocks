@@ -1,4 +1,8 @@
-export enum FabricIconType {
+import {Enum} from '../utility/enum'
+
+Enum.register(IconType, "IconType");
+
+export enum IconType {
   CircleEmpty,
   CircleFill,
   Placeholder,

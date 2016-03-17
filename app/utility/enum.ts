@@ -1,13 +1,7 @@
 import * as _ from 'lodash';
 import {switches} from './globals';
 
-export interface EnumType<T> {
-  [key: number]: string;
-};
-
-declare type EnumValueOrString<T> = T | string;
-
-export var enhanceEnum = _.merge;
+export interface EnumType<T> { [key: number]: string; };
 
 export interface EnumOptions {
   doNumericChecks?: boolean;
@@ -34,25 +28,25 @@ var defaultEnumOptions: EnumOptions = {
 };
 
 export class EnumMetadata<T> {
-  private config: EnumOptions;
+  config: EnumOptions;
 
-  constructor(public enumeration: EnumType<T>, public name, options?: EnumOptions) {
+  constructor(public enumeration: EnumType<T>, public name: string, options?: EnumOptions) {
     this.config = options ? _.merge({}, defaultEnumOptions, options) : defaultEnumOptions;
 
     if (this.config.useZeroDefault && !_.isString(enumeration[0]))
       this.config.useZeroDefault = false;
   }
 
-  get displayName() {
+  get displayName(): string {
     return _.isFunction(this.config.displayNameTransform) ?
       this.config.displayNameTransform(this.name) : this.name;
   }
 
-  getValue(enumValueOrString: EnumValueOrString<T>, doInverseTransform = false): T {
+  getValue(enumValueOrString: T | string, doInverseTransform = false): T {
     let str = _.isString(enumValueOrString) ? <string>enumValueOrString : "";
 
     if (str && doInverseTransform)
-      str = this.transformStringInverse(str);
+      str = this._transformStringInverse(str);
     else if (this.config.doNumericChecks && _.isNumber(enumValueOrString))
       str = this.enumeration[<any>enumValueOrString];
 
@@ -71,7 +65,7 @@ export class EnumMetadata<T> {
   }
 
   getJSString(enumValue: T): string {
-    let str = this.getStringForEnumValue(enumValue);
+    let str = this._getStringForEnumValue(enumValue);
 
     if (_.isFunction(this.config.jsStringTransform))
       str = this.config.jsStringTransform(str);
@@ -84,7 +78,7 @@ export class EnumMetadata<T> {
   }
 
   getDisplayString(enumValue: T): string {
-    let str = this.getStringForEnumValue(enumValue);
+    let str = this._getStringForEnumValue(enumValue);
 
     if (_.isFunction(this.config.displayStringTransform))
       str = this.config.displayStringTransform(str);
@@ -92,15 +86,22 @@ export class EnumMetadata<T> {
     return  str;
   }
 
-  wrap(enumValueOrString?: EnumValueOrString<T>): EnumValueWrapper<T> {
-    return new EnumValueWrapper(this, enumValueOrString);
+  wrapper(): EnumValueWrapper<T> {
+    return new EnumValueWrapper(this);
+  }
+
+  wrap(options: EnumOptions)
+  wrap(enumValueOrString: T | string)
+  wrap(options: EnumOptions, enumValueOrString: T | string)
+  wrap(ptionsOrEnumValueOrString: EnumOptions | T | string, enumValueOrString?: T | string) {
+    return new EnumValueWrapper(this, ptionsOrEnumValueOrString, enumValueOrString);
   }
 
   getValues(): Array<T> {
     return _.valuesIn(this.enumeration).filter(_.isNumber) as Array<T>;
   }
 
-  private getStringForEnumValue(enumValue: T): string {
+  private _getStringForEnumValue(enumValue: T): string {
     let str = this.enumeration[<any>enumValue];
 
     if (!_.isString(str) && this.config.useZeroDefault)
@@ -111,7 +112,7 @@ export class EnumMetadata<T> {
     return str;
   }
 
-  private transformStringInverse(str: string): string {
+  private _transformStringInverse(str: string): string {
     str = _.isString(str) ? str : "";
 
     if (_.isString(this.config.jsStringPrefix) && this.config.jsStringPrefix.length &&
@@ -131,25 +132,100 @@ export class EnumMetadata<T> {
 }
 
 export class EnumValueWrapper<T> {
-  private enumValue: T;
+  private _metadata: EnumMetadata<T>;
+  private _enumValue: T;
 
-  constructor(private metadata: EnumMetadata<T>, enumValueOrString?: EnumValueOrString<T>) {
-    this.set(enumValueOrString);
+  constructor(metadata: EnumMetadata<T>)
+  constructor(metadata: EnumMetadata<T>, options: EnumOptions)
+  constructor(metadata: EnumMetadata<T>, enumValueOrString: T | string)
+  constructor(metadata: EnumMetadata<T>, options: EnumOptions, enumValueOrString: T | string)
+  constructor(metadata: EnumMetadata<T>,
+    optionsOrEnumValueOrString?: EnumOptions | T | string, enumValueOrString?: T | string) {
+    this._metadata = _.isObject(optionsOrEnumValueOrString) ?
+      <EnumMetadata<T>>_.merge({}, metadata, { config: optionsOrEnumValueOrString }) : metadata;
+    this.set(_.isNumber(optionsOrEnumValueOrString) || _.isString(optionsOrEnumValueOrString) ?
+      <T | string>optionsOrEnumValueOrString : enumValueOrString || null);
+  }
+
+  get hasValue(): boolean {
+    return _.isNumber(this._enumValue) &&
+      !(<number><any>this._enumValue === 0 && this._metadata.config.useZeroDefault);
   }
 
   get value(): T {
-    return this.metadata.getValue(this.enumValue);
+    return this._enumValue;
   }
 
   get jsString(): string {
-    return this.metadata.getJSString(this.enumValue);
+    return this._metadata.getJSString(this._enumValue);
   }
 
   get displayString(): string {
-    return this.metadata.getDisplayString(this.enumValue);
+    return this._metadata.getDisplayString(this._enumValue);
   }
 
-  set(enumValueOrString?: EnumValueOrString<T>): void {
-    this.enumValue = this.metadata.getValue(enumValueOrString);
+  set(enumValueOrString?: T | string): void {
+    this._enumValue = this._metadata.getValue(enumValueOrString);
+  }
+}
+
+export class Enum {
+  static metadataMap = new WeakMap<EnumType<any>, EnumMetadata<any>>();
+
+  static register<T>(
+    enumeration: EnumType<T>, name: string, options?: EnumOptions) {
+    this.metadataMap.set(enumeration, new EnumMetadata(enumeration, name, options));
+  }
+
+  static unregister<T>(enumeration: EnumType<T>) {
+    this.metadataMap.delete(enumeration);
+  }
+
+  static hasMetadata<T>(enumeration: EnumType<T>): boolean {
+    return this.metadataMap.has(enumeration);
+  }
+
+  static getMetadata<T>(enumeration: EnumType<T>): EnumMetadata<T> {
+    return <EnumMetadata<T>>this.metadataMap.get(enumeration);
+  }
+
+  static getdisplayName<T>(enumeration: EnumType<T>): string {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.displayName : null;
+  }
+
+  static getValue<T>(enumeration: EnumType<T>,
+    enumValueOrString: T | string, doInverseTransform = false): T {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.getValue(enumValueOrString, doInverseTransform) : null;
+  }
+
+  static getJSString<T>(enumeration: EnumType<T>, enumValue: T): string {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.getJSString(enumValue) : null;
+  }
+
+  static getDisplayString<T>(enumeration: EnumType<T>, enumValue: T): string {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.getDisplayString(enumValue) : null;
+  }
+
+  static wrapper<T>(enumeration: EnumType<T>): EnumValueWrapper<T> {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.wrapper() : null;
+  }
+
+  static wrap<T>(enumeration: EnumType<T>, options: EnumOptions)
+  static wrap<T>(enumeration: EnumType<T>, enumValueOrString: T | string)
+  static wrap<T>(enumeration: EnumType<T>, options: EnumOptions, enumValueOrString: T | string)
+  static wrap<T>(enumeration: EnumType<T>, optionsOrEnumValueOrString : EnumOptions | T | string,
+    enumValueOrString?: T | string) {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.wrap(optionsOrEnumValueOrString, enumValueOrString) : null;
+  }
+
+ static getValues<T>(enumeration: EnumType<T>): Array<T> {
+    const metadata = this.getMetadata(enumeration);
+    return metadata ? metadata.getValues() : null;
   }
 }

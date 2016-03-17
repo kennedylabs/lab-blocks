@@ -1,4 +1,6 @@
-import {EnumMetadata} from '../utility/enum'
+import {Enum} from '../utility/enum'
+
+Enum.register(FontWeight, "FontWeight");
 
 export enum FontWeight {
   unspecified,
@@ -6,9 +8,4 @@ export enum FontWeight {
   semilight,
   regular,
   semiBold
-}
-
-export module Color{
-  export var metadata = new EnumMetadata<FontWeight>(FontWeight, 'FontWeight');
-  export var wrap = metadata.wrap;
 }
