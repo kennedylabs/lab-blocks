@@ -1,8 +1,6 @@
 import {ElementRef, Renderer} from 'angular2/core';
 import {EnumValueWrapper} from '../utility/enum'
 
-export var foo = {};
-
 export class EnumClassToggleBase<T> {
   protected _enumValueWrapper: EnumValueWrapper<T>;
 
