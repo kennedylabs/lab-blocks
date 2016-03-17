@@ -74,7 +74,7 @@ export class EnumMetadata<T> {
     if (_.isString(this.config.jsStringPostfix))
       str = str + this.config.jsStringPostfix;
 
-    return  str;
+    return str;
   }
 
   getDisplayString(enumValue: T): string {
@@ -86,8 +86,8 @@ export class EnumMetadata<T> {
     return  str;
   }
 
-  wrapper(): EnumValueWrapper<T> {
-    return new EnumValueWrapper(this);
+  wrapper(options?: EnumOptions): EnumValueWrapper<T> {
+    return new EnumValueWrapper(this, options);
   }
 
   wrap(options: EnumOptions)
@@ -157,14 +157,14 @@ export class EnumValueWrapper<T> {
   }
 
   get jsString(): string {
-    return this._metadata.getJSString(this._enumValue);
+    return this.hasValue ? this._metadata.getJSString(this._enumValue) : "";
   }
 
   get displayString(): string {
     return this._metadata.getDisplayString(this._enumValue);
   }
 
-  set(enumValueOrString?: T | string): void {
+  set(enumValueOrString: T | string): void {
     this._enumValue = this._metadata.getValue(enumValueOrString);
   }
 }
@@ -210,9 +210,9 @@ export class Enum {
     return metadata ? metadata.getDisplayString(enumValue) : null;
   }
 
-  static wrapper<T>(enumeration: EnumType<T>): EnumValueWrapper<T> {
+  static wrapper<T>(enumeration: EnumType<T>, options?: EnumOptions): EnumValueWrapper<T> {
     const metadata = this.getMetadata(enumeration);
-    return metadata ? metadata.wrapper() : null;
+    return metadata ? metadata.wrapper(options) : null;
   }
 
   static wrap<T>(enumeration: EnumType<T>, options: EnumOptions)

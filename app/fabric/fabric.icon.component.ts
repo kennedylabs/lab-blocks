@@ -1,23 +1,35 @@
-import {Component, Input} from 'angular2/core';
-import {NgClass, NgIf} from 'angular2/common';
-import {isString, isBlank} from 'angular2/src/facade/lang';
-import * as _ from 'lodash'
-import {FabricIconType} from './fabric.icon.enum';
+import {Component, Input, Output, EventEmitter} from 'angular2/core';
+import {NgIf, NgClass} from 'angular2/common';
+import {Enum, EnumValueWrapper} from '../utility/enum';
+import {IconType} from './fabric.icontype.enum';
 
 @Component({
-  selector: 'fabric-icon',
-  template: '<i *ng-if="iconName !== unspecified" [ngClass]="class="ms-Icon ms-Icon--{{iconName}}"></i>',
+  selector: 'uf-icon',
+  template: '<i *ng-if="iconClassName" [ngClass]="setClassNames()"></i>',
   directives: [NgClass, NgIf]
 })
+export class Icon {
+  private _iconClassName: string;
+  private _onIconClassNameChanged = new EventEmitter<IconType>();
+  private _enumValueWrapper: EnumValueWrapper<IconType> =
+    Enum.wrapper<IconType>(IconType, { jsStringPrefix: 'ms-icon--' });
 
-export class FabricIcon {
-  @Input() fabricIconType: string | FabricIconType = "none";
-
-  getClasses() {
-
+  @Input()
+  get iconType(): IconType | string {
+    return this._enumValueWrapper.value;
+  }
+  set iconType(value: IconType | string) {
+    this._enumValueWrapper.set(value);
+    this._iconClassName = this._enumValueWrapper.jsString;
+    this._onIconClassNameChanged.emit(this._enumValueWrapper.value);
   }
 
-  getStaticClasses() {
-    return "ms-icon";
+  @Output()
+  public get onIconClassNameChanged(): EventEmitter<IconType> {
+    return this._onIconClassNameChanged;
+  }
+
+  private setClassNames(): string[] {
+    return this._iconClassName ? ['ms-icon', this._iconClassName] : [];
   }
 }

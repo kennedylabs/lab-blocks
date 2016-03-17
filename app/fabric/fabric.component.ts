@@ -8,7 +8,7 @@ export class FabricComponent {
   private _borderColor = Enum.wrapper(Color);
   private _colorScheme = Enum.wrapper(Color);
 
-  getClasses() {
+  getClasses(): Enumerator<string> {
     var classes = new Array<string>();
 
     if ()
