@@ -15,7 +15,7 @@ export interface EnumOptions {
   inverseStringTransform?: (string) => string;
 }
 
-var defaultEnumOptions: EnumOptions = {
+const defaultEnumOptions: EnumOptions = {
   doNumericChecks: switches.get('isDevMode'),
   useZeroDefault: true,
   throwForBadNumericCheck: false,
@@ -86,15 +86,29 @@ export class EnumMetadata<T> {
     return  str;
   }
 
-  wrapper(options?: EnumOptions): EnumValueWrapper<T> {
-    return new EnumValueWrapper(this, options);
+  wrapper(): EnumValueWrapper<T>
+  wrapper(options: EnumOptions): EnumValueWrapper<T>
+  wrapper(jsStringCollection: Set<string>): EnumValueWrapper<T>
+  wrapper(options: EnumOptions, jsStringCollection: Set<string>): EnumValueWrapper<T>
+  wrapper(optionsOrJsStringsCollection?: EnumOptions | Set<string>,
+    jsStringsCollection?: Set<string>): EnumValueWrapper<T> {
+
+    const options = _.isPlainObject(optionsOrJsStringsCollection) ?
+      <EnumOptions>optionsOrJsStringsCollection : null;
+    jsStringsCollection = optionsOrJsStringsCollection &&
+      !_.isPlainObject(optionsOrJsStringsCollection) ?
+      <Set<string>>optionsOrJsStringsCollection : null;
+
+    var wrapper = new EnumValueWrapper(this, options);
+    if (jsStringsCollection) wrapper.attachJSStringsCollection(jsStringsCollection);
+    return wrapper;
   }
 
   wrap(options: EnumOptions)
   wrap(enumValueOrString: T | string)
   wrap(options: EnumOptions, enumValueOrString: T | string)
-  wrap(ptionsOrEnumValueOrString: EnumOptions | T | string, enumValueOrString?: T | string) {
-    return new EnumValueWrapper(this, ptionsOrEnumValueOrString, enumValueOrString);
+  wrap(optionsOrEnumValueOrString: EnumOptions | T | string, enumValueOrString?: T | string) {
+    return new EnumValueWrapper<T>(this, optionsOrEnumValueOrString, enumValueOrString);
   }
 
   getValues(): Array<T> {
@@ -133,7 +147,8 @@ export class EnumMetadata<T> {
 
 export class EnumValueWrapper<T> {
   private _metadata: EnumMetadata<T>;
-  private _enumValue: T;
+  private _enumValue: T = null;
+  private _jsStringsCollection: Set<string> = null;
 
   constructor(metadata: EnumMetadata<T>)
   constructor(metadata: EnumMetadata<T>, options: EnumOptions)
@@ -141,6 +156,7 @@ export class EnumValueWrapper<T> {
   constructor(metadata: EnumMetadata<T>, options: EnumOptions, enumValueOrString: T | string)
   constructor(metadata: EnumMetadata<T>,
     optionsOrEnumValueOrString?: EnumOptions | T | string, enumValueOrString?: T | string) {
+
     this._metadata = _.isObject(optionsOrEnumValueOrString) ?
       <EnumMetadata<T>>_.merge({}, metadata, { config: optionsOrEnumValueOrString }) : metadata;
     this.set(_.isNumber(optionsOrEnumValueOrString) || _.isString(optionsOrEnumValueOrString) ?
@@ -165,7 +181,21 @@ export class EnumValueWrapper<T> {
   }
 
   set(enumValueOrString: T | string): void {
+    if (this._jsStringsCollection && this.hasValue)
+      this._jsStringsCollection.delete(this.jsString);
+
     this._enumValue = this._metadata.getValue(enumValueOrString);
+
+    if (this._jsStringsCollection && this.hasValue)
+      this._jsStringsCollection.add(this.jsString);
+  }
+
+  attachJSStringsCollection(jsStringsCollection: Set<string>): void {
+    this._jsStringsCollection = jsStringsCollection;
+  }
+  detachJSStringsCollection(): void {
+    this._jsStringsCollection = null;
+    return this;
   }
 }
 
@@ -196,6 +226,7 @@ export class Enum {
 
   static getValue<T>(enumeration: EnumType<T>,
     enumValueOrString: T | string, doInverseTransform = false): T {
+
     const metadata = this.getMetadata(enumeration);
     return metadata ? metadata.getValue(enumValueOrString, doInverseTransform) : null;
   }
@@ -210,9 +241,18 @@ export class Enum {
     return metadata ? metadata.getDisplayString(enumValue) : null;
   }
 
-  static wrapper<T>(enumeration: EnumType<T>, options?: EnumOptions): EnumValueWrapper<T> {
+  static wrapper<T>(enumeration: EnumType<T>): EnumValueWrapper<T>;
+  static wrapper<T>(enumeration: EnumType<T>, options: EnumOptions): EnumValueWrapper<T>;
+  static wrapper<T>(enumeration: EnumType<T>,
+    jsStringCollection: Set<string>): EnumValueWrapper<T>;
+  static wrapper<T>(enumeration: EnumType<T>, options: EnumOptions,
+    jsStringCollection: Set<string>): EnumValueWrapper<T>;
+  static wrapper<T>(enumeration: EnumType<T>,
+    optionsOrJsStringsCollection?: EnumOptions | Set<string>,
+    options?: EnumOptions): EnumValueWrapper<T> {
+
     const metadata = this.getMetadata(enumeration);
-    return metadata ? metadata.wrapper(options) : null;
+    return metadata ? metadata.wrapper(optionsOrJsStringsCollection, options) : null;
   }
 
   static wrap<T>(enumeration: EnumType<T>, options: EnumOptions)
@@ -220,6 +260,7 @@ export class Enum {
   static wrap<T>(enumeration: EnumType<T>, options: EnumOptions, enumValueOrString: T | string)
   static wrap<T>(enumeration: EnumType<T>, optionsOrEnumValueOrString : EnumOptions | T | string,
     enumValueOrString?: T | string) {
+
     const metadata = this.getMetadata(enumeration);
     return metadata ? metadata.wrap(optionsOrEnumValueOrString, enumValueOrString) : null;
   }

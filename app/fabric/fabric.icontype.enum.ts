@@ -1,6 +1,6 @@
 import {Enum} from '../utility/enum'
 
-Enum.register(IconType, "IconType");
+Enum.register(IconType, "IconType", { jsStringPrefix: 'ms-icon-' });
 
 export enum IconType {
   CircleEmpty,

@@ -1,6 +1,6 @@
 import {Enum} from '../utility/enum'
 
-Enum.register(AnimationType, "AnimationType");
+Enum.register(AnimationType, "AnimationType", { jsStringPrefix: 'ms-u-' });
 
 export enum AnimationType {
   Unspecified,
@@ -31,12 +31,5 @@ export enum AnimationType {
   FadeOut400,
   FadeOut100,
   FadeOut200,
-  FadeOut500,
-  Rotate90deg,
-  RotateN90deg,
-  ExpandCollapse400,
-  ExpandCollapse200,
-  ExpandCollapse100,
-  Delay100,
-  Delay200
+  FadeOut500
 }

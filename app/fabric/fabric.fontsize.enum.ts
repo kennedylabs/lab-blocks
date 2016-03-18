@@ -1,6 +1,7 @@
 import {Enum} from '../utility/enum'
 
 Enum.register(FontSize, 'FontSize', {
+  jsStringPrefix: 'ms-fontSize-',
   displayStringTransform: getDisplayString,
   inverseStringTransform: getInverseDisplayString
 });
