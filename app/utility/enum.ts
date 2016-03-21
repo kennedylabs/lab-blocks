@@ -180,14 +180,22 @@ export class EnumValueWrapper<T> {
     return this._metadata.getDisplayString(this._enumValue);
   }
 
+  get metadata(): EnumMetadata<T> {
+    return this._metadata;
+  }
+
   set(enumValueOrString: T | string): void {
-    if (this._jsStringsCollection && this.hasValue)
-      this._jsStringsCollection.delete(this.jsString);
+    const enumValue = this._metadata.getValue(enumValueOrString);
 
-    this._enumValue = this._metadata.getValue(enumValueOrString);
+    if (this._enumValue !== enumValue) {
+      if (this._jsStringsCollection && this.hasValue)
+        this._jsStringsCollection.delete(this.jsString);
 
-    if (this._jsStringsCollection && this.hasValue)
-      this._jsStringsCollection.add(this.jsString);
+      this._enumValue = enumValue;
+
+      if (this._jsStringsCollection && this.hasValue)
+        this._jsStringsCollection.add(this.jsString);
+    }
   }
 
   attachJSStringsCollection(jsStringsCollection: Set<string>): void {
@@ -195,12 +203,11 @@ export class EnumValueWrapper<T> {
   }
   detachJSStringsCollection(): void {
     this._jsStringsCollection = null;
-    return this;
   }
 }
 
 export class Enum {
-  static metadataMap = new WeakMap<EnumType<any>, EnumMetadata<any>>();
+  private static metadataMap = new Map<EnumType<any>, EnumMetadata<any>>();
 
   static register<T>(
     enumeration: EnumType<T>, name: string, options?: EnumOptions) {
@@ -249,16 +256,17 @@ export class Enum {
     jsStringCollection: Set<string>): EnumValueWrapper<T>;
   static wrapper<T>(enumeration: EnumType<T>,
     optionsOrJsStringsCollection?: EnumOptions | Set<string>,
-    options?: EnumOptions): EnumValueWrapper<T> {
+    jsStringsCollection?: Set<string>): EnumValueWrapper<T> {
 
     const metadata = this.getMetadata(enumeration);
-    return metadata ? metadata.wrapper(optionsOrJsStringsCollection, options) : null;
+    return metadata ? (jsStringsCollection ?
+      metadata.wrapper(optionsOrJsStringsCollection, jsStringsCollection) : metadata.wrapper(optionsOrJsStringsCollection)) : null;
   }
 
   static wrap<T>(enumeration: EnumType<T>, options: EnumOptions)
   static wrap<T>(enumeration: EnumType<T>, enumValueOrString: T | string)
   static wrap<T>(enumeration: EnumType<T>, options: EnumOptions, enumValueOrString: T | string)
-  static wrap<T>(enumeration: EnumType<T>, optionsOrEnumValueOrString : EnumOptions | T | string,
+  static wrap<T>(enumeration: EnumType<T>, optionsOrEnumValueOrString?: EnumOptions | T | string,
     enumValueOrString?: T | string) {
 
     const metadata = this.getMetadata(enumeration);

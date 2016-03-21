@@ -1,4 +1,4 @@
-import {Enum} from '../utility/enum'
+import { Enum } from '../utility/enum'
 
 Enum.register(FontWeight, "FontWeight", { jsStringPrefix: 'ms-fontWeight-' });
 

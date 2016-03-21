@@ -1,4 +1,4 @@
-import {Enum} from '../utility/enum'
+import { Enum } from '../utility/enum'
 
 Enum.register(Color, "Color");
 

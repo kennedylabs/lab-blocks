@@ -1,28 +1,20 @@
-import {Component, Input, Output} from 'angular2/core';
-import {NgIf, NgClass} from 'angular2/common';
-import {FabricComponent} from './fabric.component';
-import {Enum, EnumValueWrapper, IconType} from './fabric.enums';
+import { Component, Input } from 'angular2/core';
+import { NgIf, NgClass } from 'angular2/common';
+import { FabricComponent } from './fabric.component';
+import { Enum, IconType } from './fabric.enums';
 
 @Component({
   selector: 'ms-icon',
-  template: '<i *ng-if="iconTypeValue !=== IconType.Unspecified" [ngClass]="cssClasses"></i>',
+  template: '<i *ng -if="iconType" class="ms-icon"[ngClass] = "cssClasses"></i>',
   directives: [NgIf, NgClass]
 })
 export class Icon extends FabricComponent {
-  private _enumValueWrapper: EnumValueWrapper<IconType> =
-    Enum.wrapper<IconType>(IconType, { jsStringPrefix: 'ms-icon--' }, this.cssClasses);
-
-  constructor() {
-    super();
-    this.cssClasses.add('ms-icon');
-  }
+  private _iconType = Enum.wrapper<IconType>(IconType, this.cssClasses);
 
   @Input()
-  set iconType(value: IconType | string) {
-    this._enumValueWrapper.set(value);
-  }
-
-  get iconTypeValue(): IconType {
-    return this._enumValueWrapper.value;
+  get iconType(): IconType | string {
+    return this._iconType.value;
+  }set iconType(value: IconType | string) {
+    this._iconType.set(value);
   }
 }

@@ -1,14 +1,13 @@
-import {Directive, ElementRef, Renderer} from 'angular2/core';
-import {EnumClassToggleBase} from './fabric.enumclasstoogglebase.directive';
-import {Enum} from '../utility/enum'
-import {Color} from './fabric.color.enum'
+import { Directive, OnInit } from 'angular2/core';
+import { EnumClassToggleBase } from './fabric.enumclasstoogglebase.directive';
+import { Enum, Color } from './fabric.enums'
 
 @Directive({
-  inputs: ['uf-fg-color: value']
+  selector: '[fgColor]',
+  inputs: ['fgColor: value']
 })
-export class fgColor extends EnumClassToggleBase<Color>  {
-  constructor(_ngEl: ElementRef, _renderer: Renderer) {
-    super(_ngEl, _renderer);
-    this._enumValueWrapper = Enum.wrapper<Color>(Color);
+export class fgColor extends EnumClassToggleBase<Color> implements OnInit {
+  ngOnInit(): void {
+    this._enumValueWrapper = Enum.wrapper<Color>(Color, { jsStringPrefix: 'ms-fontColor-' });
   }
 }
